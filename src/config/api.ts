@@ -1,20 +1,22 @@
 // API Configuration - All endpoints in one place
+const BASE_URL = 'https://api.vesastar.top';
+
 export const API_CONFIG = {
-  baseUrl: '/api',
+  baseUrl: BASE_URL,
   
   endpoints: {
-    login: '/api/login',
+    login: `${BASE_URL}/api/login`,
     stats: {
-      system: '/api/stats/system',
-      storage: '/api/stats/storage',
-      temperature: '/api/stats/temperature',
+      system: `${BASE_URL}/api/stats/system`,
+      storage: `${BASE_URL}/api/stats/storage`,
+      temperature: `${BASE_URL}/api/stats/temperature`,
     },
     docker: {
-      containers: '/api/docker/containers',
+      containers: `${BASE_URL}/api/docker/containers`,
     },
-    install: '/api/install',
-    installStatus: '/api/install/status',
-    terminal: '/terminal',
+    install: `${BASE_URL}/api/install`,
+    installStatus: `${BASE_URL}/api/install/status`,
+    terminal: `wss://api.vesastar.top/terminal`,
   },
   
   // Polling intervals in milliseconds
