@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Terminal as TerminalIcon, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { API_CONFIG } from '@/config/api';
 
 interface TerminalLine {
   id: number;
@@ -30,27 +31,21 @@ export const Terminal = () => {
     const token = sessionStorage.getItem('auth_token');
     if (!token) return;
 
-    try {
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const ws = new WebSocket(`${protocol}//${window.location.host}/terminal?token=${token}`);
-      
-      ws.onopen = () => setConnected(true);
-      ws.onclose = () => setConnected(false);
-      ws.onerror = () => setConnected(false);
-      
-      ws.onmessage = (event) => {
-        setLines(prev => [
-          ...prev,
-          { id: lineIdRef.current++, type: 'output', content: event.data },
-        ]);
-      };
+    const ws = new WebSocket(`${API_CONFIG.endpoints.terminal}?token=${token}`);
+    
+    ws.onopen = () => setConnected(true);
+    ws.onclose = () => setConnected(false);
+    ws.onerror = () => setConnected(false);
+    
+    ws.onmessage = (event) => {
+      setLines(prev => [
+        ...prev,
+        { id: lineIdRef.current++, type: 'output', content: event.data },
+      ]);
+    };
 
-      wsRef.current = ws;
-      return () => ws.close();
-    } catch {
-      // WebSocket not available, use demo mode
-      setConnected(false);
-    }
+    wsRef.current = ws;
+    return () => ws.close();
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -66,27 +61,10 @@ export const Terminal = () => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(newInput);
     } else {
-      // Demo mode - simulate responses
-      setTimeout(() => {
-        let response = 'Command not found';
-        
-        if (newInput === 'help') {
-          response = 'Available commands: help, uptime, df, free, docker ps';
-        } else if (newInput === 'uptime') {
-          response = '15:32:41 up 42 days, 3:15, 2 users, load average: 0.52, 0.48, 0.42';
-        } else if (newInput === 'df') {
-          response = 'Filesystem      Size  Used Avail Use%\n/dev/sda1       932G  450G  435G  51%';
-        } else if (newInput === 'free') {
-          response = '              total        used        free\nMem:           32Gi       12Gi       15Gi';
-        } else if (newInput === 'docker ps') {
-          response = 'CONTAINER ID   NAME            STATUS\na1b2c3d4e5f6   jellyfin        Up 2 days\nb2c3d4e5f6g7   homeassistant   Up 2 days';
-        }
-
-        setLines(prev => [
-          ...prev,
-          { id: lineIdRef.current++, type: 'output', content: response },
-        ]);
-      }, 300);
+      setLines(prev => [
+        ...prev,
+        { id: lineIdRef.current++, type: 'error', content: 'Not connected to terminal' },
+      ]);
     }
 
     setInput('');

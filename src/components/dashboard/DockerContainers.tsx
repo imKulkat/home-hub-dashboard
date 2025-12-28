@@ -12,20 +12,9 @@ interface ContainerData {
   ports: string[];
 }
 
-// Mock containers for demo
-const mockContainers: ContainerData[] = [
-  { id: '1', name: 'jellyfin', status: 'running', cpu: 12.5, ram: '1.2 GB', ports: ['8096:8096'] },
-  { id: '2', name: 'homeassistant', status: 'running', cpu: 3.2, ram: '512 MB', ports: ['8123:8123'] },
-  { id: '3', name: 'nextcloud', status: 'running', cpu: 5.1, ram: '768 MB', ports: ['8080:80'] },
-  { id: '4', name: 'vaultwarden', status: 'stopped', cpu: 0, ram: '0 MB', ports: ['8222:80'] },
-  { id: '5', name: 'qbittorrent', status: 'running', cpu: 8.3, ram: '256 MB', ports: ['8085:8085'] },
-  { id: '6', name: 'sonarr', status: 'running', cpu: 1.5, ram: '384 MB', ports: ['8989:8989'] },
-];
-
 export const DockerContainers = () => {
   const [containers, setContainers] = useState<ContainerData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [useMock, setUseMock] = useState(false);
 
   const fetchContainers = async () => {
     try {
@@ -33,13 +22,9 @@ export const DockerContainers = () => {
       if (response.ok) {
         const data = await response.json();
         setContainers(data);
-        setUseMock(false);
-      } else {
-        throw new Error('API not available');
       }
-    } catch {
-      setUseMock(true);
-      setContainers(mockContainers);
+    } catch (error) {
+      console.error('Failed to fetch containers:', error);
     } finally {
       setIsLoading(false);
     }
@@ -66,11 +51,6 @@ export const DockerContainers = () => {
           <h2 className="text-lg font-semibold text-foreground">Docker Containers</h2>
         </div>
         <div className="flex items-center gap-2">
-          {useMock && (
-            <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
-              Demo Mode
-            </span>
-          )}
           <button
             onClick={() => {
               setIsLoading(true);

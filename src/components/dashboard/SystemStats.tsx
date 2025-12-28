@@ -20,29 +20,10 @@ interface TemperatureData {
   cpu: number;
 }
 
-// Mock data for demo (replace with real API calls)
-const getMockData = () => ({
-  system: {
-    cpu: Math.floor(Math.random() * 40) + 15,
-    ram: Math.floor(Math.random() * 30) + 40,
-    ramTotal: 32,
-    ramUsed: Math.floor(Math.random() * 10) + 12,
-  },
-  storage: {
-    used: 450,
-    total: 1000,
-    percent: 45,
-  },
-  temperature: {
-    cpu: Math.floor(Math.random() * 15) + 45,
-  },
-});
-
 export const SystemStats = () => {
   const [system, setSystem] = useState<SystemData | null>(null);
   const [storage, setStorage] = useState<StorageData | null>(null);
   const [temperature, setTemperature] = useState<TemperatureData | null>(null);
-  const [useMock, setUseMock] = useState(false);
 
   const fetchStats = async () => {
     try {
@@ -52,21 +33,11 @@ export const SystemStats = () => {
         authFetch(API_CONFIG.endpoints.stats.temperature),
       ]);
 
-      if (sysRes.ok && storRes.ok && tempRes.ok) {
-        setSystem(await sysRes.json());
-        setStorage(await storRes.json());
-        setTemperature(await tempRes.json());
-        setUseMock(false);
-      } else {
-        throw new Error('API not available');
-      }
-    } catch {
-      // Use mock data if API is not available
-      setUseMock(true);
-      const mock = getMockData();
-      setSystem(mock.system);
-      setStorage(mock.storage);
-      setTemperature(mock.temperature);
+      if (sysRes.ok) setSystem(await sysRes.json());
+      if (storRes.ok) setStorage(await storRes.json());
+      if (tempRes.ok) setTemperature(await tempRes.json());
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
     }
   };
 
@@ -86,11 +57,6 @@ export const SystemStats = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-foreground">System Stats</h2>
-        {useMock && (
-          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
-            Demo Mode
-          </span>
-        )}
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
