@@ -64,15 +64,14 @@ export const AppStore = () => {
       };
 
       pollStatus();
-    } catch {
-      // Demo mode - simulate success after delay
-      setTimeout(() => {
-        setInstallStatus(prev => ({ ...prev, [appId]: 'success' }));
-        toast({
-          title: 'Installation Complete',
-          description: `${apps.find(a => a.id === appId)?.name} has been installed (demo).`,
-        });
-      }, 2000);
+    } catch (error) {
+      console.error('Install failed:', error);
+      setInstallStatus(prev => ({ ...prev, [appId]: 'error' }));
+      toast({
+        title: 'Installation Failed',
+        description: `Failed to install ${apps.find(a => a.id === appId)?.name}.`,
+        variant: 'destructive',
+      });
     }
   };
 
